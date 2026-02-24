@@ -5,6 +5,10 @@ This app supports authentication, secure token storage, course browsing, and res
 # Screenshots 
 
 
+https://github.com/user-attachments/assets/a0130d58-ae12-4bae-80c6-f05b1c93d74f
+
+
+
 # Features
 - User Authentication (Login / Register)
 - Secure Token Storage
