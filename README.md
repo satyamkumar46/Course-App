@@ -1,50 +1,83 @@
-# Welcome to your Expo app 👋
+# Course App – React Native (Expo + TypeScript)
+A modern Course Management Mobile Application built using React Native Expo (Latest SDK) with TypeScript (strict mode).
+This app supports authentication, secure token storage, course browsing, and responsive UI design. 
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+# Features
+- User Authentication (Login / Register)
+- Secure Token Storage
+- Course Listing
+- Course Details View
+- Profile Management
+- Responsive UI
+- Push Notifications (Planned)
 
-## Get started
+# Tech Stack
+- React Native (Expo)
+- TypeScript (Strict Mode)
+- Expo Router (File-based navigation)
+- Expo SecureStore (Sensitive data storage)
+- AsyncStorage (App data persistence)
+- NativeWind (Tailwind CSS for React Native)
+- REST API Integration
 
-1. Install dependencies
+# Setup Instructions
 
-   ```bash
-   npm install
-   ```
+1. Clone the Repository
+   - git clone
+   - cd course-app
 
-2. Start the app
+2. Install Dependencies
+   - npm install
 
-   ```bash
-   npx expo start
-   ```
+3. Start the Development Server
+   - npx expo start
 
-In the output, you'll find options to open the app in a
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+# Environment Variables Needed
+-  Create a .env file in the root directory:
+-  EXPO_PUBLIC_API_URL=https://api.freeapi.app/api/v1
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+# Key Architectural Decisions
 
-## Get a fresh project
+1. Expo Router (File-Based Navigation)
+   - Clean folder-based routing structure
+   - Simplifies stack and tab navigation
+   - Scalable for large apps
+  
+2. TypeScript Strict Mode
+   - Improves type safety
+   - Reduces runtime errors
+   - Better developer experience
 
-When you're ready, run:
+3. Secure Authentication Storage
+   - JWT stored using Expo SecureStore
+   - Prevents sensitive token exposure
+   - AsyncStorage used for non-sensitive app data
 
-```bash
-npm run reset-project
-```
+4. Responsive Design Strategy
+   - Custom wp() and hp() helpers
+   - Safe area handling
+   - Consistent spacing system
+   - NativeWind utility-first styling
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+# Known Issues / Limitations
 
-## Learn more
+- Push notifications not fully implemented yet
+- No offline caching for course data
+- API error handling can be improved
+- No unit tests implemented
+- Android status bar UI overlap requires manual adjustment in some devices
+- Api server issue due to which image(course thumbnail) not visible
 
-To learn more about developing your project with Expo, look at the following resources:
+# Screenshots of Main Screens
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
 
-## Join the community
 
-Join our community of developers creating universal apps.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+
+
+
+
+
+
