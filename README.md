@@ -2,6 +2,9 @@
 A modern Course Management Mobile Application built using React Native Expo (Latest SDK) with TypeScript (strict mode).
 This app supports authentication, secure token storage, course browsing, and responsive UI design. 
 
+# Screenshots 
+
+
 # Features
 - User Authentication (Login / Register)
 - Secure Token Storage
@@ -69,7 +72,7 @@ This app supports authentication, secure token storage, course browsing, and res
 - Android status bar UI overlap requires manual adjustment in some devices
 - Api server issue due to which image(course thumbnail) not visible
 
-# Screenshots of Main Screens
+
 
 
 
