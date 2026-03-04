@@ -3,29 +3,35 @@ import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
-  Platform,
   Pressable,
   RefreshControl,
   StyleSheet,
   TextInput,
   View,
-  ActivityIndicator,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { useAuth } from '@/contexts/auth-context';
+import { useApiError } from '@/contexts/api-error-context';
 import { useResponsive } from '@/hooks/use-responsive';
 import { useThemeColor } from '@/hooks/use-theme-color';
-import { getProfileImageUri } from '@/data/profile-image';
-import { getBookmarkedIds, toggleBookmark } from '@/data/bookmarks';
-import { useApiError } from '@/contexts/api-error-context';
-import { showBookmarkMilestoneIfNeeded } from '@/lib/notifications';
-import { getPurchasedCourseIds } from '@/data/purchases';
 import { api, type ApiError } from '@/lib/api';
-import type { ApiCourse } from './courses';
+import { getPurchasedCourseIds } from '@/data/purchases';
+import { getBookmarkedIds, toggleBookmark } from '@/data/bookmarks';
+import { showBookmarkMilestoneIfNeeded } from '@/lib/notifications';
+
+export type ApiCourse = {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  rating: number;
+  thumbnail: string;
+  instructor: string;
+  category: string;
+};
 
 function CourseCard({
   course,
@@ -78,25 +84,17 @@ function CourseCard({
   );
 }
 
-export default function HomeScreen() {
-  const { user } = useAuth();
-  const { horizontalPadding, listGap, rs } = useResponsive();
-  const { setError: setApiError } = useApiError();
-  const tint = useThemeColor({}, 'tint');
-  const background = useThemeColor({}, 'background');
-
-  const [profileImageUri, setProfileImageUri] = useState<string | null>(null);
+export default function CoursesScreen() {
   const [courses, setCourses] = useState<ApiCourse[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const [bookmarkedIds, setBookmarkedIds] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
 
-  const loadProfileImage = useCallback(async () => {
-    const uri = await getProfileImageUri();
-    setProfileImageUri(uri);
-  }, []);
+  const { horizontalPadding, listGap } = useResponsive();
+  const { setError: setApiError } = useApiError();
+  const icon = useThemeColor({}, 'icon');
 
   const fetchCourses = useCallback(async () => {
     try {
@@ -141,19 +139,20 @@ export default function HomeScreen() {
   }, []);
 
   useEffect(() => {
-    loadProfileImage();
     fetchCourses();
+  }, [fetchCourses]);
+
+  useEffect(() => {
     loadPurchases();
     loadBookmarks();
-  }, [loadProfileImage, fetchCourses, loadPurchases, loadBookmarks]);
+  }, [loadPurchases, loadBookmarks]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
     fetchCourses();
     loadPurchases();
     loadBookmarks();
-    loadProfileImage();
-  }, [fetchCourses, loadPurchases, loadBookmarks, loadProfileImage]);
+  }, [fetchCourses, loadPurchases, loadBookmarks]);
 
   const handleBookmark = useCallback(async (courseId: string) => {
     const added = await toggleBookmark(courseId);
@@ -164,25 +163,15 @@ export default function HomeScreen() {
     }
   }, [loadBookmarks]);
 
-  const filteredCourses =
-    searchQuery.trim() === ''
-      ? courses
-      : courses.filter(
-          (c) =>
-            c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            c.instructor.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            c.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (c.description && c.description.toLowerCase().includes(searchQuery.toLowerCase()))
-        );
-
-  const icon = useThemeColor({}, 'icon');
-
-  const renderHeader = () => (
-    <View style={styles.welcomeSection}>
-      <ThemedText type="title">Welcome, {user?.username ?? 'User'}!</ThemedText>
-      <ThemedText style={styles.subtitle}>Discover courses and start learning today</ThemedText>
-    </View>
-  );
+  const filteredCourses = searchQuery.trim()
+    ? courses.filter(
+        (c) =>
+          c.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          c.instructor.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          c.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          (c.description && c.description.toLowerCase().includes(searchQuery.toLowerCase()))
+      )
+    : courses;
 
   if (loading) {
     return (
@@ -194,42 +183,48 @@ export default function HomeScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <SafeAreaView style={[styles.headerSection, { backgroundColor: background }]} edges={['top']}>
-        <View style={[styles.headerInner, { paddingHorizontal: horizontalPadding, paddingBottom: rs(16) }]}>
-        <View style={styles.headerRow}>
-          <Pressable onPress={() => router.push('/(tabs)/profile')} style={styles.profileButton} hitSlop={8}>
-            {profileImageUri ? (
-              <Image source={{ uri: profileImageUri }} style={styles.profileImage} />
-            ) : (
-              <View style={[styles.profilePlaceholder, { backgroundColor: tint }]}>
-                <ThemedText style={styles.profileInitial}>
-                  {user?.username?.charAt(0).toUpperCase() ?? '?'}
-                </ThemedText>
-              </View>
-            )}
-          </Pressable>
-          <ThemedText type="subtitle" style={styles.headerTitle}>Course App</ThemedText>
-          <Pressable onPress={() => router.push('/(tabs)/bookmarks')} style={styles.bookmarkButton} hitSlop={8}>
-            <MaterialIcons name="bookmark" size={26} color={tint} />
-          </Pressable>
-        </View>
+      <View style={[styles.searchContainer, { margin: horizontalPadding, marginBottom: 0, borderColor: icon }]}>
+        <MaterialIcons name="search" size={22} color={icon} style={styles.searchIcon} />
         <TextInput
-          style={[styles.search, { borderColor: icon, color: icon, backgroundColor: background }]}
+          style={[styles.searchInput, { color: icon }]}
           placeholder="Search courses, instructors, categories..."
           placeholderTextColor={icon}
           value={searchQuery}
           onChangeText={setSearchQuery}
+          returnKeyType="search"
+          autoCorrect={false}
         />
-        </View>
-      </SafeAreaView>
-
+        {searchQuery.length > 0 && (
+          <Pressable onPress={() => setSearchQuery('')} style={styles.clearButton}>
+            <MaterialIcons name="close" size={20} color={icon} />
+          </Pressable>
+        )}
+      </View>
+      {searchQuery.trim() !== '' && (
+        <ThemedText style={[styles.resultCount, { marginHorizontal: horizontalPadding }]}>
+          {filteredCourses.length} {filteredCourses.length === 1 ? 'result' : 'results'} found
+        </ThemedText>
+      )}
       <FlatList
         data={filteredCourses}
         keyExtractor={(item) => item.id}
-        contentContainerStyle={[styles.list, { padding: horizontalPadding, gap: listGap }]}
-        ListHeaderComponent={renderHeader}
+        contentContainerStyle={[styles.list, { padding: horizontalPadding, gap: listGap }, filteredCourses.length === 0 && styles.emptyList]}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        ListEmptyComponent={
+          searchQuery.trim() !== '' ? (
+            <View style={styles.emptyState}>
+              <MaterialIcons name="search-off" size={48} color={icon} />
+              <ThemedText style={styles.emptyTitle}>No courses found</ThemedText>
+              <ThemedText style={styles.emptySubtitle}>
+                Try a different search term
+              </ThemedText>
+              <Pressable onPress={() => setSearchQuery('')} style={styles.clearSearchBtn}>
+                <ThemedText style={styles.clearSearchText}>Clear Search</ThemedText>
+              </Pressable>
+            </View>
+          ) : null
         }
         renderItem={({ item }) => (
           <CourseCard
@@ -258,77 +253,60 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerSection: {
-    ...Platform.select({
-      ios: {
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 1 },
-        shadowOpacity: 0.06,
-        shadowRadius: 2,
-      },
-      android: {
-        elevation: 2,
-      },
-    }),
-  },
-  headerInner: {
-    paddingTop: 12,
-  },
-  headerRow: {
+  searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    minHeight: 44,
-    marginBottom: 12,
+    margin: 16,
+    marginBottom: 0,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
   },
-  profileButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
+  searchIcon: {
+    marginRight: 8,
   },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  profilePlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  profileInitial: {
-    color: '#fff',
-    fontSize: 17,
-    fontWeight: '700',
-  },
-  headerTitle: {
+  searchInput: {
     flex: 1,
-    textAlign: 'center',
+    paddingVertical: 12,
+    fontSize: 16,
+  },
+  clearButton: {
+    padding: 4,
+  },
+  resultCount: {
+    marginHorizontal: 16,
+    marginTop: 8,
+    fontSize: 13,
+    opacity: 0.7,
+  },
+  emptyList: {
+    flexGrow: 1,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 48,
+  },
+  emptyTitle: {
     fontSize: 18,
     fontWeight: '600',
+    marginTop: 12,
   },
-  bookmarkButton: {
-    width: 40,
-    height: 40,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  search: {
-    borderWidth: 1,
-    borderRadius: 10,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    fontSize: 15,
-  },
-  welcomeSection: {
-    marginBottom: 16,
-  },
-  subtitle: {
-    opacity: 0.7,
+  emptySubtitle: {
+    fontSize: 14,
+    opacity: 0.6,
     marginTop: 4,
+  },
+  clearSearchBtn: {
+    marginTop: 16,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: 'rgba(128,128,128,0.15)',
+  },
+  clearSearchText: {
+    fontWeight: '600',
   },
   list: {
     padding: 16,

@@ -1,35 +1,50 @@
-import { Tabs } from 'expo-router';
-import React from 'react';
+import { Stack } from "expo-router";
+import React from "react";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { Colors } from "@/constants/theme";
 
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
+export default function MainLayout() {
   return (
-    <Tabs
+    <Stack
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
+        headerStyle: {
+          backgroundColor: Colors.light.background,
+        },
+        headerTintColor: Colors.light.text,
+        contentStyle: {
+          backgroundColor: Colors.light.background,
+        },
+      }}
+    >
+      <Stack.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          headerShown: false,
         }}
       />
-      <Tabs.Screen
-        name="explore"
+      <Stack.Screen
+        name="courses"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: "Courses",
+          headerShown: false,
         }}
       />
-    </Tabs>
+      <Stack.Screen
+        name="profile"
+        options={{
+          title: "Profile",
+          headerShown: true,
+          presentation: "modal",
+        }}
+      />
+      <Stack.Screen
+        name="bookmarks"
+        options={{
+          title: "Bookmarks",
+          headerShown: true,
+        }}
+      />
+      <Stack.Screen name="explore" />
+    </Stack>
   );
 }
