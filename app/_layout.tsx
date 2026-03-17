@@ -89,7 +89,7 @@ export const unstable_settings = {
   initialRouteName: "(auth)",
 };
 
-export default function RootLayout() {
+export default function RootLayout() { 
   return (
     <SafeAreaProvider>
       <ThemeProvider value={DefaultTheme}>
